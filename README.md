@@ -1,5 +1,8 @@
 # DiscordBot - Gestor de roles por password
 
+![](https://img.shields.io/github/stars/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/forks/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/tag/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/release/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/issues/MASISOMETAL/discord-bot-manage-rol.svg) !
+
+
 ### Caracteristicas
 
 - Asignar uno o mas passwords para un rol especifico
@@ -8,10 +11,7 @@
 - Cualquier usuario puede obtener un rol poniendo el password adecuado
 - Cada vez que un usuario usa un password, este se elimina
 
-![](https://img.shields.io/github/stars/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/forks/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/tag/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/release/MASISOMETAL/discord-bot-manage-rol.svg) ![](https://img.shields.io/github/issues/MASISOMETAL/discord-bot-manage-rol.svg) !
-
-
-###Lista de comandos
+### Lista de comandos
 
 ##### Comandos de admin
 - /configrol: Podras asignar un rol y un password para ese rol, para que luego un usuario pueda adquirir ese rol usando el password
@@ -21,7 +21,7 @@
 ##### Comandos de usuarios
 - / addrol: Permite que el usuario pueda obtener un rol asignando un password, luego que el usuario obtiene el rol, este password desaparece
 
-##IMPORTANTE
+## IMPORTANTE
 
 Recuerde siempre poner el bot por arriba de los roles que van a afectar
 
