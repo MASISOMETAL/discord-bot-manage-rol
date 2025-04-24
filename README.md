@@ -21,5 +21,9 @@
 ##### Comandos de usuarios
 - / addrol: Permite que el usuario pueda obtener un rol asignando un password, luego que el usuario obtiene el rol, este password desaparece
 
+##IMPORTANTE
+
+Recuerde siempre poner el bot por arriba de los roles que van a afectar
+
 ### Link al bot
 [Obten el Bot en tu server](https://discord.com/oauth2/authorize?client_id=1364981410200424520&permissions=268438528&integration_type=0&scope=bot+applications.commands)
