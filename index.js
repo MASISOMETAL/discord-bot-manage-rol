@@ -61,7 +61,7 @@ client.on('interactionCreate', async (interaction) => {
       await db.addRole(guild.id, role.id, password);
       interaction.reply(`El rol **${role.name}** ha sido configurado con la contraseña.`);
     } catch (err) {
-      interaction.reply({ content: "⚠️ La contraseña **${password}** ya está asociada a otro rol. Por favor, elige una contraseña diferente.", ephemeral: true });
+      interaction.reply({ content: `⚠️ La contraseña **${password}** ya está asociada a otro rol. Por favor, elige una contraseña diferente.`, ephemeral: true });
     }
   }
 
