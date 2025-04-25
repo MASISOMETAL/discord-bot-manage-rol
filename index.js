@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, PermissionsBitField, SlashCommandBuilder, REST, Routes } = require('discord.js');
+const { Client, GatewayIntentBits, PermissionsBitField, SlashCommandBuilder, REST, Routes, MessageFlags } = require('discord.js');
 const db = require('./database.js');
 require('dotenv').config()
 
@@ -143,14 +143,14 @@ client.on('interactionCreate', async (interaction) => {
     // Enviar el mensaje al usuario
     interaction.reply({
       embeds: [embed],
-      ephemeral: true
+      flags: MessageFlags.Ephemeral
     });
   }
 
 
   if (commandName === 'setrol') {
     if (!member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: 'No tienes permisos para usar este comando.', ephemeral: true });
+      return interaction.reply({ content: 'No tienes permisos para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
     const role = options.getRole('role');
@@ -158,9 +158,9 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await db.addRole(guild.id, role.id, password);
-      interaction.reply({content: `El rol **${role.name}** ha sido configurado con la contraseña.`, ephemeral: true });
+      interaction.reply({content: `El rol **${role.name}** ha sido configurado con la contraseña.`, flags: MessageFlags.Ephemeral });
     } catch (err) {
-      interaction.reply({ content: `⚠️ La contraseña **${password}** ya está asociada a otro rol. Por favor, elige una contraseña diferente.`, ephemeral: true });
+      interaction.reply({ content: `⚠️ La contraseña **${password}** ya está asociada a otro rol. Por favor, elige una contraseña diferente.`, flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -170,53 +170,53 @@ client.on('interactionCreate', async (interaction) => {
     try {
       const roleData = await db.getRoleByPassword(guild.id, password);
       if (!roleData) {
-        return interaction.reply({ content: 'Contraseña incorrecta o ya fue usada.', ephemeral: true });
+        return interaction.reply({ content: 'Contraseña incorrecta o ya fue usada.', flags: MessageFlags.Ephemeral });
       }
 
       const role = guild.roles.cache.get(roleData.role_id);
       if (!role) {
-        return interaction.reply({ content: 'El rol asociado a esta contraseña no existe.', ephemeral: true });
+        return interaction.reply({ content: 'El rol asociado a esta contraseña no existe.', flags: MessageFlags.Ephemeral });
       }
 
       await member.roles.add(role);
       await db.deleteRoleByPassword(guild.id, password);
 
-      interaction.reply({ content: `¡Has recibido el rol **${role.name}**!`, ephemeral: true });
+      interaction.reply({ content: `¡Has recibido el rol **${role.name}**!`, flags: MessageFlags.Ephemeral });
     } catch (err) {
-      interaction.reply({ content: 'Error al asignar el rol: ' + err.message, ephemeral: true });
+      interaction.reply({ content: 'Error al asignar el rol: ' + err.message, flags: MessageFlags.Ephemeral });
     }
   }
 
   if (commandName === 'seerol') {
     if (!member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: 'No tienes permisos para usar este comando.', ephemeral: true });
+      return interaction.reply({ content: 'No tienes permisos para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
     try {
       const roles = await db.getAllRoles(guild.id);
       if (roles.length === 0) {
-        return interaction.reply({ content: 'No hay roles configurados en este servidor.', ephemeral: true });
+        return interaction.reply({ content: 'No hay roles configurados en este servidor.', flags: MessageFlags.Ephemeral });
       }
 
       const roleList = roles.map(r => `Rol: <@&${r.role_id}> - Contraseña: ${r.password}`).join('\n');
-      interaction.reply({content: `Roles configurados:\n${roleList}`, ephemeral: true });
+      interaction.reply({content: `Roles configurados:\n${roleList}`, flags: MessageFlags.Ephemeral });
     } catch (err) {
-      interaction.reply({ content: 'Error al obtener los roles: ' + err.message, ephemeral: true });
+      interaction.reply({ content: 'Error al obtener los roles: ' + err.message, flags: MessageFlags.Ephemeral });
     }
   }
 
   if (commandName === 'delrol') {
     if (!member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: 'No tienes permisos para usar este comando.', ephemeral: true });
+      return interaction.reply({ content: 'No tienes permisos para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
     const password = options.getString('password');
 
     try {
       await db.deleteRoleByPassword(guild.id, password);
-      interaction.reply({content: 'El rol ha sido eliminado correctamente.', ephemeral: true});
+      interaction.reply({content: 'El rol ha sido eliminado correctamente.', flags: MessageFlags.Ephemeral});
     } catch (err) {
-      interaction.reply({ content: 'Error al eliminar el rol: ' + err.message, ephemeral: true });
+      interaction.reply({ content: 'Error al eliminar el rol: ' + err.message, flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -224,7 +224,7 @@ client.on('interactionCreate', async (interaction) => {
 
   if (commandName === 'groupconfig') {
     if (!member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: 'No tienes permisos para usar este comando.', ephemeral: true });
+      return interaction.reply({ content: 'No tienes permisos para usar este comando.', flags: MessageFlags.Ephemeral });
     }
 
     const masterRole = options.getRole('master_role');
@@ -232,9 +232,9 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await db.addGroupRole(guild.id, masterRole.id, assignableRole.id);
-      interaction.reply({content: `Roles configurados:\n- Maestro: **${masterRole.name}**\n- Asignable: **${assignableRole.name}**`, ephemeral: true});
+      interaction.reply({content: `Roles configurados:\n- Maestro: **${masterRole.name}**\n- Asignable: **${assignableRole.name}**`, flags: MessageFlags.Ephemeral});
     } catch (err) {
-      interaction.reply({ content: 'Error al configurar los roles: ' + err.message, ephemeral: true });
+      interaction.reply({ content: 'Error al configurar los roles: ' + err.message, flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -249,7 +249,7 @@ client.on('interactionCreate', async (interaction) => {
       if (!hasMasterRole) {
         return interaction.reply({
           content: 'No tienes el rol maestro requerido para usar este comando.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
 
@@ -258,18 +258,18 @@ client.on('interactionCreate', async (interaction) => {
       if (!roleInDatabase) {
         return interaction.reply({
           content: 'El rol ingresado no está configurado como un rol maestro.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
 
       // Crear el password para el rol maestro
       await db.createPassword(guild.id, masterRoleInput.id, password);
-      interaction.reply({content: `Password asignado exitosamente al rol maestro **${masterRoleInput.name}**: **${password}**`, ephemeral: true});
+      interaction.reply({content: `Password asignado exitosamente al rol maestro **${masterRoleInput.name}**: **${password}**`, flags: MessageFlags.Ephemeral});
     } catch (err) {
       // Manejo de errores
       interaction.reply({
         content: 'Error al generar el password: ' + err.message,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   }
@@ -285,14 +285,14 @@ client.on('interactionCreate', async (interaction) => {
 
       const assignableRole = guild.roles.cache.get(roleData.assignable_role_id);
       if (!assignableRole) {
-        return interaction.reply({ content: 'El rol asociado no existe.', ephemeral: true });
+        return interaction.reply({ content: 'El rol asociado no existe.', flags: MessageFlags.Ephemeral });
       }
 
       await member.roles.add(assignableRole);
       await db.deletePassword(guild.id, roleData.master_role_id, password);
-      interaction.reply({content: `¡Has recibido el rol **${assignableRole.name}**!`, ephemeral: true});
+      interaction.reply({content: `¡Has recibido el rol **${assignableRole.name}**!`, flags: MessageFlags.Ephemeral});
     } catch (err) {
-      interaction.reply({ content: 'Password inválido.', ephemeral: true });
+      interaction.reply({ content: 'Password inválido.', flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -304,20 +304,20 @@ client.on('interactionCreate', async (interaction) => {
     if (!hasMasterRole) {
       return interaction.reply({
         content: 'No tienes el rol maestro requerido para usar este comando.',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
     try {
       const passwords = await db.getMasterRolePasswords(guild.id, masterRoleInput.id);
       if (!passwords.length) {
-        return interaction.reply({content: 'No hay passwords configurados.', ephemeral: true});
+        return interaction.reply({content: 'No hay passwords configurados.', flags: MessageFlags.Ephemeral});
       }
 
       const passwordList = passwords.map(p => `Password: ${p.password}`).join('\n');
-      interaction.reply({content: `Passwords configurados:\n${passwordList}`, ephemeral: true});
+      interaction.reply({content: `Passwords configurados:\n${passwordList}`, flags: MessageFlags.Ephemeral});
     } catch (err) {
-      interaction.reply({ content: 'Error al obtener los passwords: ' + err.message, ephemeral: true });
+      interaction.reply({ content: 'Error al obtener los passwords: ' + err.message, flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -331,7 +331,7 @@ client.on('interactionCreate', async (interaction) => {
       if (!roleData) {
         return interaction.reply({
           content: 'Password inválido o no existe.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
 
@@ -341,17 +341,17 @@ client.on('interactionCreate', async (interaction) => {
       if (!hasMasterRole) {
         return interaction.reply({
           content: 'No tienes el rol maestro requerido para eliminar este password.',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
 
       // Eliminar el registro del password
       await db.deletePassword(guild.id, roleData.master_role_id, password);
-      interaction.reply({content: 'Password eliminado correctamente.', ephemeral: true});
+      interaction.reply({content: 'Password eliminado correctamente.', flags: MessageFlags.Ephemeral});
     } catch (err) {
       interaction.reply({
         content: 'Error al eliminar el password: ' + err.message,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   }
