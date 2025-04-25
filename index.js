@@ -102,11 +102,15 @@ client.on('interactionCreate', async (interaction) => {
 
   if (commandName === 'managerolinfo') {
     // Mensaje de información
-    const embed = {
+    const embed1 = {
       color: 0x0099ff,
-      title: 'Información de Comandos',
+      title: 'Comando de roles',
       description: 'Detalles de los comandos de gestión de roles disponibles:',
       fields: [
+        {
+          name: '/managerolinfo',
+          value: 'Proporciona información sobre los comandos de gestión de roles.\n**Sin parámetros.**',
+        },
         {
           name: '/setrol',
           value: 'Configura un rol con una contraseña.\n**Parámetros:**\n- `role`: El rol que será configurado.\n- `password`: Contraseña asociada al rol.\n**Solo administradores.**',
@@ -123,6 +127,14 @@ client.on('interactionCreate', async (interaction) => {
           name: '/delrol',
           value: 'Elimina un rol configurado.\n**Parámetros:**\n- `password`: Contraseña asociada al rol que deseas eliminar.\n**Solo administradores.**',
         },
+      ],
+    };
+
+    const embed2 = {
+      color: 0xff9900,
+      title: 'Comando de grupo de roles',
+      description: 'Detalle de comando de los grupos de roles:',
+      fields: [
         {
           name: '/groupconfig',
           value: 'Configura un rol maestro y un rol asignable.\n**Parámetros:**\n- `master_role`: Rol maestro.\n- `assignable_role`: Rol asignable.\n**Solo administradores.**',
@@ -151,16 +163,12 @@ client.on('interactionCreate', async (interaction) => {
           name: '/delgrouprol',
           value: 'Elimina un password asociado a un rol maestro.\n**Parámetros:**\n- `password`: Contraseña que deseas eliminar.',
         },
-        {
-          name: '/managerolinfo',
-          value: 'Proporciona información sobre los comandos de gestión de roles.\n**Sin parámetros.**',
-        },
-      ],
-    };
+      ]
+    }
 
     // Enviar el mensaje al usuario
     interaction.reply({
-      embeds: [embed],
+      embeds: [embed1, embed2],
       flags: MessageFlags.Ephemeral
     });
   }
