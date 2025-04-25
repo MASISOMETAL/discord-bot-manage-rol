@@ -104,12 +104,4 @@ Recuerde siempre poner el bot por arriba de los roles que van a afectar
 ### Link al bot
 [Obten el Bot en tu server](https://discord.com/oauth2/authorize?client_id=1364981410200424520&permissions=268453888&integration_type=0&scope=bot+applications.commands)
 
-- /setgrouprol: (solo habilitado para admines) este comando debe tener 2 inputs, ambos inputs debe aceptar roles, que se van a guardar en sqlite3, el primer rol, va a ser el rol maestro por asi decirlo, y el segundo rol, va a ser el rol que este rol maestro pueda asignar
-
-/grouprol: (este comando solo puede activarlos los que tengan el rol maestro, o sea, debe buscar en la bd si el rol está ahi) y debe permitir poner 1 input, este input va a permitir un password, que se va a guardar en la base de datos, el password debe ser unico entre todos los setgrouprol
-
-/addgroup: este rol, lo deben poder usar cualquier usuario, y debe permitir poner un password, si este password coincide con algunos de todos los passwords guardado en la base de datos, entonces le asigna el segundo rol que se configuro en setgrouprol
-
-/seegrouprol: solo el que tiene el master rol puede ver los passwords creados
-
-/delgrouprol: solo el que tiene el masterrol puede borrar los password creados
+Gracias por usarme
