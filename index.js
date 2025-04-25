@@ -158,7 +158,7 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await db.addRole(guild.id, role.id, password);
-      interaction.reply(`El rol **${role.name}** ha sido configurado con la contraseña.`);
+      interaction.reply({content: `El rol **${role.name}** ha sido configurado con la contraseña.`, ephemeral: true });
     } catch (err) {
       interaction.reply({ content: `⚠️ La contraseña **${password}** ya está asociada a otro rol. Por favor, elige una contraseña diferente.`, ephemeral: true });
     }
@@ -181,7 +181,7 @@ client.on('interactionCreate', async (interaction) => {
       await member.roles.add(role);
       await db.deleteRoleByPassword(guild.id, password);
 
-      interaction.reply(`¡Has recibido el rol **${role.name}**!`);
+      interaction.reply({ content: `¡Has recibido el rol **${role.name}**!`, ephemeral: true });
     } catch (err) {
       interaction.reply({ content: 'Error al asignar el rol: ' + err.message, ephemeral: true });
     }
@@ -195,11 +195,11 @@ client.on('interactionCreate', async (interaction) => {
     try {
       const roles = await db.getAllRoles(guild.id);
       if (roles.length === 0) {
-        return interaction.reply('No hay roles configurados en este servidor.');
+        return interaction.reply({ content: 'No hay roles configurados en este servidor.', ephemeral: true });
       }
 
       const roleList = roles.map(r => `Rol: <@&${r.role_id}> - Contraseña: ${r.password}`).join('\n');
-      interaction.reply(`Roles configurados:\n${roleList}`);
+      interaction.reply({content: `Roles configurados:\n${roleList}`, ephemeral: true });
     } catch (err) {
       interaction.reply({ content: 'Error al obtener los roles: ' + err.message, ephemeral: true });
     }
@@ -214,7 +214,7 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await db.deleteRoleByPassword(guild.id, password);
-      interaction.reply('El rol ha sido eliminado correctamente.');
+      interaction.reply({content: 'El rol ha sido eliminado correctamente.', ephemeral: true});
     } catch (err) {
       interaction.reply({ content: 'Error al eliminar el rol: ' + err.message, ephemeral: true });
     }
@@ -232,7 +232,7 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await db.addGroupRole(guild.id, masterRole.id, assignableRole.id);
-      interaction.reply(`Roles configurados:\n- Maestro: **${masterRole.name}**\n- Asignable: **${assignableRole.name}**`);
+      interaction.reply({content: `Roles configurados:\n- Maestro: **${masterRole.name}**\n- Asignable: **${assignableRole.name}**`, ephemeral: true});
     } catch (err) {
       interaction.reply({ content: 'Error al configurar los roles: ' + err.message, ephemeral: true });
     }
@@ -264,7 +264,7 @@ client.on('interactionCreate', async (interaction) => {
 
       // Crear el password para el rol maestro
       await db.createPassword(guild.id, masterRoleInput.id, password);
-      interaction.reply(`Password asignado exitosamente al rol maestro **${masterRoleInput.name}**: **${password}**`);
+      interaction.reply({content: `Password asignado exitosamente al rol maestro **${masterRoleInput.name}**: **${password}**`, ephemeral: true});
     } catch (err) {
       // Manejo de errores
       interaction.reply({
@@ -290,7 +290,7 @@ client.on('interactionCreate', async (interaction) => {
 
       await member.roles.add(assignableRole);
       await db.deletePassword(guild.id, roleData.master_role_id, password);
-      interaction.reply(`¡Has recibido el rol **${assignableRole.name}**!`);
+      interaction.reply({content: `¡Has recibido el rol **${assignableRole.name}**!`, ephemeral: true});
     } catch (err) {
       interaction.reply({ content: 'Password inválido.', ephemeral: true });
     }
@@ -311,11 +311,11 @@ client.on('interactionCreate', async (interaction) => {
     try {
       const passwords = await db.getMasterRolePasswords(guild.id, masterRoleInput.id);
       if (!passwords.length) {
-        return interaction.reply('No hay passwords configurados.');
+        return interaction.reply({content: 'No hay passwords configurados.', ephemeral: true});
       }
 
       const passwordList = passwords.map(p => `Password: ${p.password}`).join('\n');
-      interaction.reply(`Passwords configurados:\n${passwordList}`);
+      interaction.reply({content: `Passwords configurados:\n${passwordList}`, ephemeral: true});
     } catch (err) {
       interaction.reply({ content: 'Error al obtener los passwords: ' + err.message, ephemeral: true });
     }
@@ -347,7 +347,7 @@ client.on('interactionCreate', async (interaction) => {
 
       // Eliminar el registro del password
       await db.deletePassword(guild.id, roleData.master_role_id, password);
-      interaction.reply('Password eliminado correctamente.');
+      interaction.reply({content: 'Password eliminado correctamente.', ephemeral: true});
     } catch (err) {
       interaction.reply({
         content: 'Error al eliminar el password: ' + err.message,
