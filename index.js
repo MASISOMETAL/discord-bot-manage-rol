@@ -36,6 +36,16 @@ const commands = [
     .addRoleOption(option => option.setName('master_role').setDescription('El rol maestro').setRequired(true))
     .addRoleOption(option => option.setName('assignable_role').setDescription('El rol asignable').setRequired(true)),
   new SlashCommandBuilder()
+    .setName('groupconfigsee')
+    .setDescription('Permite al administrador ver todos los grupos configurados.'),
+  new SlashCommandBuilder()
+    .setName('groupconfigdel')
+    .setDescription('Permite al administrador eliminar un grupo configurado basado en el master role.')
+    .addRoleOption(option =>
+      option.setName('master_role')
+        .setDescription('El rol maestro que deseas eliminar.')
+        .setRequired(true)),
+  new SlashCommandBuilder()
     .setName('setgrouprol')
     .setDescription('Asigna un password a un rol maestro.')
     .addRoleOption(option =>
@@ -98,44 +108,52 @@ client.on('interactionCreate', async (interaction) => {
       description: 'Detalles de los comandos de gestión de roles disponibles:',
       fields: [
         {
-          name: '**/setrol**',
-          value: 'Configura un rol con una contraseña.\n*Parámetros:*\n- `role`: El rol que será configurado.\n- `password`: Contraseña asociada al rol.\n**Solo administradores.**',
+          name: '/setrol',
+          value: 'Configura un rol con una contraseña.\n**Parámetros:**\n- `role`: El rol que será configurado.\n- `password`: Contraseña asociada al rol.\n**Solo administradores.**',
         },
         {
-          name: '**/joinrol**',
-          value: 'Obtén un rol usando una contraseña.\n*Parámetros:*\n- `password`: Contraseña del rol que se desea obtener.',
+          name: '/joinrol',
+          value: 'Obtén un rol usando una contraseña.\n**Parámetros:**\n- `password`: Contraseña del rol que se desea obtener.',
         },
         {
-          name: '**/seerol**',
-          value: 'Muestra todos los roles y sus contraseñas configuradas en el servidor.\n*Sin parámetros.*\n**Solo administradores.**',
+          name: '/seerol',
+          value: 'Muestra todos los roles y sus contraseñas configuradas en el servidor.\n**Sin parámetros.**\n**Solo administradores.**',
         },
         {
-          name: '**/delrol**',
-          value: 'Elimina un rol configurado.\n*Parámetros:*\n- `password`: Contraseña asociada al rol que deseas eliminar.\n**Solo administradores.**',
+          name: '/delrol',
+          value: 'Elimina un rol configurado.\n**Parámetros:**\n- `password`: Contraseña asociada al rol que deseas eliminar.\n**Solo administradores.**',
         },
         {
-          name: '**/groupconfig**',
-          value: 'Configura un rol maestro y un rol asignable.\n*Parámetros:*\n- `master_role`: Rol maestro.\n- `assignable_role`: Rol asignable.\n**Solo administradores.**',
+          name: '/groupconfig',
+          value: 'Configura un rol maestro y un rol asignable.\n**Parámetros:**\n- `master_role`: Rol maestro.\n- `assignable_role`: Rol asignable.\n**Solo administradores.**',
         },
         {
-          name: '**/setgrouprol**',
-          value: 'Asigna un password único a un rol maestro.\n*Parámetros:*\n- `master_role`: Rol maestro.\n- `password`: Contraseña única.',
+          name: '/groupconfigsee',
+          value: 'Permite al administrador ver todos los grupos configurados.\n**Sin parámetros.**\n**Solo administradores.**',
         },
         {
-          name: '**/joingrouprol**',
-          value: 'Usa un password para obtener un rol asignable.\n*Parámetros:*\n- `password`: Contraseña del rol asignable.',
+          name: '/groupconfigdel',
+          value: 'Permite al administrador eliminar un grupo configurado basado en el master role.\n**Parámetros:**\n- `master_role`: Rol maestro que deseas eliminar.\n**Solo administradores.**',
         },
         {
-          name: '**/seegrouprol**',
-          value: 'Muestra los passwords asociados a un rol maestro del usuario.\n*Parámetros:*\n- `master_role`: Rol maestro cuyos passwords quieres ver.',
+          name: '/setgrouprol',
+          value: 'Asigna un password único a un rol maestro.\n**Parámetros:**\n- `master_role`: Rol maestro.\n- `password`: Contraseña única.',
         },
         {
-          name: '**/delgrouprol**',
-          value: 'Elimina un password asociado a un rol maestro.\n*Parámetros:*\n- `password`: Contraseña que deseas eliminar.',
+          name: '/joingrouprol',
+          value: 'Usa un password para obtener un rol asignable.\n**Parámetros:**\n- `password`: Contraseña del rol asignable.',
         },
         {
-          name: '**/managerolinfo**',
-          value: 'Proporciona información sobre los comandos de gestión de roles.\n*Sin parámetros.*',
+          name: '/seegrouprol',
+          value: 'Muestra los passwords asociados a un rol maestro del usuario.\n**Parámetros:**\n- `master_role`: Rol maestro cuyos passwords quieres ver.',
+        },
+        {
+          name: '/delgrouprol',
+          value: 'Elimina un password asociado a un rol maestro.\n**Parámetros:**\n- `password`: Contraseña que deseas eliminar.',
+        },
+        {
+          name: '/managerolinfo',
+          value: 'Proporciona información sobre los comandos de gestión de roles.\n**Sin parámetros.**',
         },
       ],
     };
@@ -158,9 +176,9 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await db.addRole(guild.id, role.id, password);
-      interaction.reply({content: `El rol **${role.name}** ha sido configurado con la contraseña.`, flags: MessageFlags.Ephemeral });
+      interaction.reply({ content: `El rol **${role.name}** ha sido configurado con la contraseña.`, flags: MessageFlags.Ephemeral });
     } catch (err) {
-      interaction.reply({ content: `⚠️ La contraseña **${password}** ya está asociada a otro rol. Por favor, elige una contraseña diferente.`, flags: MessageFlags.Ephemeral });
+      interaction.reply({ content: `⚠️ La contraseña **${password}** ya está siendo usada. Por favor, elige una contraseña diferente.`, flags: MessageFlags.Ephemeral });
     }
   }
 
@@ -199,7 +217,7 @@ client.on('interactionCreate', async (interaction) => {
       }
 
       const roleList = roles.map(r => `Rol: <@&${r.role_id}> - Contraseña: ${r.password}`).join('\n');
-      interaction.reply({content: `Roles configurados:\n${roleList}`, flags: MessageFlags.Ephemeral });
+      interaction.reply({ content: `Roles configurados:\n${roleList}`, flags: MessageFlags.Ephemeral });
     } catch (err) {
       interaction.reply({ content: 'Error al obtener los roles: ' + err.message, flags: MessageFlags.Ephemeral });
     }
@@ -214,7 +232,7 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await db.deleteRoleByPassword(guild.id, password);
-      interaction.reply({content: 'El rol ha sido eliminado correctamente.', flags: MessageFlags.Ephemeral});
+      interaction.reply({ content: 'El rol ha sido eliminado correctamente.', flags: MessageFlags.Ephemeral });
     } catch (err) {
       interaction.reply({ content: 'Error al eliminar el rol: ' + err.message, flags: MessageFlags.Ephemeral });
     }
@@ -231,12 +249,71 @@ client.on('interactionCreate', async (interaction) => {
     const assignableRole = options.getRole('assignable_role');
 
     try {
+      const allGroupsconfig = await db.getGroupRole(guild.id)
+      const hasRepitMasterRole = allGroupsconfig.some(role => role.master_role_id === masterRole.id)
+
+      if (hasRepitMasterRole) return interaction.reply({ content: `El rol **${masterRole.name}** ya está asociado a un rol asignable.`, flags: MessageFlags.Ephemeral })
+
+    } catch (error) {
+      return interaction.reply({ content: `Error al intentar obtener todos los grupos de roles ${error}`, flags: MessageFlags.Ephemeral })
+    }
+
+    try {
       await db.addGroupRole(guild.id, masterRole.id, assignableRole.id);
-      interaction.reply({content: `Roles configurados:\n- Maestro: **${masterRole.name}**\n- Asignable: **${assignableRole.name}**`, flags: MessageFlags.Ephemeral});
+      interaction.reply({ content: `Roles configurados:\n- Maestro: **${masterRole.name}**\n- Asignable: **${assignableRole.name}**`, flags: MessageFlags.Ephemeral });
     } catch (err) {
       interaction.reply({ content: 'Error al configurar los roles: ' + err.message, flags: MessageFlags.Ephemeral });
     }
   }
+
+  if (commandName === 'groupconfigsee') {
+    if (!member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+      return interaction.reply({ content: 'No tienes permisos para usar este comando.', flags: MessageFlags.Ephemeral });
+    }
+
+    try {
+      // Obtener todos los grupos desde la base de datos
+      const groups = await db.getGroupRole(guild.id);
+
+      if (groups.length === 0) {
+        return interaction.reply({ content: 'No hay grupos configurados en este servidor.', flags: MessageFlags.Ephemeral });
+      }
+
+      // Construir la respuesta
+      const groupList = groups.map(group =>
+        `**Master Role:** <@&${group.master_role_id}> | **Assignable Role:** <@&${group.assignable_role_id}>`
+      ).join('\n');
+
+      interaction.reply({ content: `Grupos configurados:\n${groupList}`, flags: MessageFlags.Ephemeral });
+    } catch (err) {
+      interaction.reply({ content: 'Error al obtener los grupos: ' + err.message, flags: MessageFlags.Ephemeral });
+    }
+  }
+
+  if (commandName === 'groupconfigdel') {
+    if (!member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+      return interaction.reply({ content: 'No tienes permisos para usar este comando.', flags: MessageFlags.Ephemeral });
+    }
+
+    const masterRole = options.getRole('master_role');
+
+    try {
+      // Verificar si el rol existe en la base de datos
+      const roleExists = await db.getMasterRole(guild.id, masterRole.id);
+
+      if (!roleExists) {
+        return interaction.reply({ content: 'El rol maestro proporcionado no está configurado en la base de datos.', flags: MessageFlags.Ephemeral });
+      }
+
+      // Eliminar el registro del rol maestro
+      await db.deleteGroupRole(guild.id, masterRole.id);
+      interaction.reply(`El grupo asociado al rol maestro **${masterRole.name}** ha sido eliminado correctamente.`);
+    } catch (err) {
+      interaction.reply({ content: 'Error al eliminar el grupo: ' + err.message, flags: MessageFlags.Ephemeral });
+    }
+  }
+
+
 
   if (commandName === 'setgrouprol') {
     // Obtener los inputs del usuario
@@ -264,7 +341,7 @@ client.on('interactionCreate', async (interaction) => {
 
       // Crear el password para el rol maestro
       await db.createPassword(guild.id, masterRoleInput.id, password);
-      interaction.reply({content: `Password asignado exitosamente al rol maestro **${masterRoleInput.name}**: **${password}**`, flags: MessageFlags.Ephemeral});
+      interaction.reply({ content: `Password asignado exitosamente al rol maestro **${masterRoleInput.name}**: **${password}**`, flags: MessageFlags.Ephemeral });
     } catch (err) {
       // Manejo de errores
       interaction.reply({
@@ -290,7 +367,7 @@ client.on('interactionCreate', async (interaction) => {
 
       await member.roles.add(assignableRole);
       await db.deletePassword(guild.id, roleData.master_role_id, password);
-      interaction.reply({content: `¡Has recibido el rol **${assignableRole.name}**!`, flags: MessageFlags.Ephemeral});
+      interaction.reply({ content: `¡Has recibido el rol **${assignableRole.name}**!`, flags: MessageFlags.Ephemeral });
     } catch (err) {
       interaction.reply({ content: 'Password inválido.', flags: MessageFlags.Ephemeral });
     }
@@ -311,11 +388,11 @@ client.on('interactionCreate', async (interaction) => {
     try {
       const passwords = await db.getMasterRolePasswords(guild.id, masterRoleInput.id);
       if (!passwords.length) {
-        return interaction.reply({content: 'No hay passwords configurados.', flags: MessageFlags.Ephemeral});
+        return interaction.reply({ content: 'No hay passwords configurados.', flags: MessageFlags.Ephemeral });
       }
 
       const passwordList = passwords.map(p => `Password: ${p.password}`).join('\n');
-      interaction.reply({content: `Passwords configurados:\n${passwordList}`, flags: MessageFlags.Ephemeral});
+      interaction.reply({ content: `Passwords configurados:\n${passwordList}`, flags: MessageFlags.Ephemeral });
     } catch (err) {
       interaction.reply({ content: 'Error al obtener los passwords: ' + err.message, flags: MessageFlags.Ephemeral });
     }
@@ -347,7 +424,7 @@ client.on('interactionCreate', async (interaction) => {
 
       // Eliminar el registro del password
       await db.deletePassword(guild.id, roleData.master_role_id, password);
-      interaction.reply({content: 'Password eliminado correctamente.', flags: MessageFlags.Ephemeral});
+      interaction.reply({ content: 'Password eliminado correctamente.', flags: MessageFlags.Ephemeral });
     } catch (err) {
       interaction.reply({
         content: 'Error al eliminar el password: ' + err.message,

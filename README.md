@@ -59,7 +59,22 @@
 
 ---
 
-### **6. /setgrouprol**
+### **6. /groupconfigsee**
+- **Descripción:** Permite al administrador ver todos los grupos configurados.
+- **Parámetros:** Sin parámetros.
+- **Restricciones:** Solo administradores pueden ejecutarlo.
+
+---
+
+### **7. /groupconfigdel**
+- **Descripción:** Permite al administrador eliminar un grupo configurado basado en el master role.
+- **Parámetros:**
+  - `master_role` (Role): Rol maestro que deseas eliminar.
+- **Restricciones:** Solo administradores pueden ejecutarlo.
+
+---
+
+### **8. /setgrouprol**
 - **Descripción:** Asigna un password único a un rol maestro.
 - **Parámetros:**
   - `master_role` (Role): Rol maestro al que se asignará el password.
@@ -68,7 +83,7 @@
 
 ---
 
-### **7. /joingrouprol**
+### **9. /joingrouprol**
 - **Descripción:** Usa un password para obtener un rol asignable.
 - **Parámetros:**
   - `password` (String): Contraseña del rol asignable.
@@ -76,7 +91,7 @@
 
 ---
 
-### **8. /seegrouprol**
+### **10. /seegrouprol**
 - **Descripción:** Muestra los passwords asociados a un rol maestro del usuario.
 - **Parámetros:**
   - `master_role` (Role): Rol maestro cuyos passwords quieres ver.
@@ -84,7 +99,7 @@
 
 ---
 
-### **9. /delgrouprol**
+### **11. /delgrouprol**
 - **Descripción:** Elimina un password asociado a un rol maestro.
 - **Parámetros:**
   - `password` (String): Contraseña que deseas eliminar.
@@ -92,7 +107,7 @@
 
 ---
 
-### **10. /managerolinfo**
+### **12. /managerolinfo**
 - **Descripción:** Proporciona información sobre los comandos de gestión de roles.
 - **Parámetros:** Sin parámetros.
 - **Restricciones:** Accesible para todos los usuarios.

@@ -81,6 +81,16 @@ module.exports = {
     });
   },
 
+  getGroupRole(serverId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT master_role_id, assignable_role_id FROM group_roles WHERE server_id = ?`;
+      db.all(query, [serverId], (err, row) => {
+        if (err) reject(err)
+        else resolve(row)
+      })
+    })
+  },
+
   createPassword(serverId, masterRoleId, password) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO passwords (server_id, master_role_id, password) VALUES (?, ?, ?)`;
@@ -123,5 +133,27 @@ module.exports = {
         else resolve();
       });
     });
+  },
+
+  getMasterRole(serverId, masterRoleId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM group_roles WHERE server_id = ? AND master_role_id = ?`;
+      db.get(query, [serverId, masterRoleId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  },
+
+  deleteGroupRole(serverId, masterRoleId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM group_roles WHERE server_id = ? AND master_role_id = ?`;
+      db.run(query, [serverId, masterRoleId], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
   }
+
+
 };
