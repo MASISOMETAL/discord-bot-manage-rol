@@ -153,7 +153,19 @@ module.exports = {
         else resolve();
       });
     });
-  }
+  },
 
+  getGroupRoleByMasterRole(serverId, masterRoleId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT assignable_role_id 
+        FROM group_roles 
+        WHERE server_id = ? AND master_role_id = ?`;
+      db.get(query, [serverId, masterRoleId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  }
 
 };

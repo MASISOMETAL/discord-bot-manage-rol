@@ -5,7 +5,7 @@ require('dotenv').config()
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.APP_ID;
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
@@ -80,6 +80,24 @@ const commands = [
   new SlashCommandBuilder()
     .setName('managerolinfo')
     .setDescription('Proporciona información sobre los comandos de gestión de roles.'),
+  new SlashCommandBuilder()
+    .setName('seemember')
+    .setDescription('Muestra todos los miembros con el rol asignado al rol maestro.')
+    .addRoleOption(option =>
+      option.setName('role')
+        .setDescription('El rol maestro que deseas verificar.')
+        .setRequired(true)),
+  new SlashCommandBuilder()
+    .setName('delmember')
+    .setDescription('Permite eliminar el rol asignado de un usuario.')
+    .addRoleOption(option =>
+      option.setName('master_role')
+        .setDescription('El rol maestro asociado.')
+        .setRequired(true))
+    .addUserOption(option =>
+      option.setName('target_user')
+        .setDescription('El usuario al que deseas quitar el rol asignado.')
+        .setRequired(true)),
 ].map(command => command.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -101,74 +119,88 @@ client.on('interactionCreate', async (interaction) => {
   const { commandName, options, guild, member } = interaction;
 
   if (commandName === 'managerolinfo') {
-    // Mensaje de información
-    const embed1 = {
-      color: 0x0099ff,
-      title: 'Comando de roles',
-      description: 'Detalles de los comandos de gestión de roles disponibles:',
+    const adminEmbed = {
+      color: 0xff0000,
+      title: 'Comandos de Administradores',
+      description: 'Lista de comandos exclusivos para administradores:',
       fields: [
         {
-          name: '/managerolinfo',
-          value: 'Proporciona información sobre los comandos de gestión de roles.\n**Sin parámetros.**',
+          name: '**/managerolinfo**',
+          value: 'Proporciona información sobre los comandos de gestión de roles.\n*Sin parámetros.*',
         },
         {
-          name: '/setrol',
-          value: 'Configura un rol con una contraseña.\n**Parámetros:**\n- `role`: El rol que será configurado.\n- `password`: Contraseña asociada al rol.\n**Solo administradores.**',
+          name: '**/setrol**',
+          value: 'Configura un rol con una contraseña.\n*Parámetros:*\n- `role`: El rol que será configurado.\n- `password`: Contraseña asociada al rol.',
         },
         {
-          name: '/joinrol',
-          value: 'Obtén un rol usando una contraseña.\n**Parámetros:**\n- `password`: Contraseña del rol que se desea obtener.',
+          name: '**/seerol**',
+          value: 'Muestra todos los roles y sus contraseñas configuradas en el servidor.\n*Sin parámetros.*',
         },
         {
-          name: '/seerol',
-          value: 'Muestra todos los roles y sus contraseñas configuradas en el servidor.\n**Sin parámetros.**\n**Solo administradores.**',
+          name: '**/delrol**',
+          value: 'Elimina un rol configurado.\n*Parámetros:*\n- `password`: Contraseña asociada al rol.',
         },
         {
-          name: '/delrol',
-          value: 'Elimina un rol configurado.\n**Parámetros:**\n- `password`: Contraseña asociada al rol que deseas eliminar.\n**Solo administradores.**',
+          name: '**/groupconfig**',
+          value: 'Configura un rol maestro y un rol asignable.\n*Parámetros:*\n- `master_role`: Rol maestro.\n- `assignable_role`: Rol asignable.',
+        },
+        {
+          name: '**/groupconfigsee**',
+          value: 'Permite al administrador ver todos los grupos configurados.\n*Sin parámetros.*',
+        },
+        {
+          name: '**/groupconfigdel**',
+          value: 'Permite al administrador eliminar un grupo configurado basado en el master role.\n*Parámetros:*\n- `master_role`: Rol maestro que deseas eliminar.',
         },
       ],
     };
 
-    const embed2 = {
-      color: 0xff9900,
-      title: 'Comando de grupo de roles',
-      description: 'Detalle de comando de los grupos de roles:',
+    const rolMasterEmbed = {
+      color: 0x00ffff,
+      title: 'Comandos del rol maestro',
+      description: 'Lista de comandos accesibles para quienes tienen un rol maestro:',
       fields: [
         {
-          name: '/groupconfig',
-          value: 'Configura un rol maestro y un rol asignable.\n**Parámetros:**\n- `master_role`: Rol maestro.\n- `assignable_role`: Rol asignable.\n**Solo administradores.**',
+          name: '**/setgrouprol**',
+          value: 'Asigna un password único a un rol maestro.\n*Parámetros:*\n- `master_role`: Rol maestro.\n- `password`: Contraseña única para este rol maestro.',
         },
         {
-          name: '/groupconfigsee',
-          value: 'Permite al administrador ver todos los grupos configurados.\n**Sin parámetros.**\n**Solo administradores.**',
+          name: '**/seegrouprol**',
+          value: 'Muestra los passwords asociados a un rol maestro del usuario.\n*Parámetros:*\n- `master_role`: Rol maestro cuyos passwords quieres ver.',
         },
         {
-          name: '/groupconfigdel',
-          value: 'Permite al administrador eliminar un grupo configurado basado en el master role.\n**Parámetros:**\n- `master_role`: Rol maestro que deseas eliminar.\n**Solo administradores.**',
+          name: '**/delgrouprol**',
+          value: 'Elimina un password asociado a un rol maestro.\n*Parámetros:*\n- `password`: Contraseña que deseas eliminar.',
         },
         {
-          name: '/setgrouprol',
-          value: 'Asigna un password único a un rol maestro.\n**Parámetros:**\n- `master_role`: Rol maestro.\n- `password`: Contraseña única.',
+          name: '**/seemember**',
+          value: 'Permite al usuario con un rol maestro ver los usuarios que tienen el rol asignado.\n*Parámetros:*\n- `role`: Rol maestro que deseas verificar.',
         },
         {
-          name: '/joingrouprol',
-          value: 'Usa un password para obtener un rol asignable.\n**Parámetros:**\n- `password`: Contraseña del rol asignable.',
-        },
-        {
-          name: '/seegrouprol',
-          value: 'Muestra los passwords asociados a un rol maestro del usuario.\n**Parámetros:**\n- `master_role`: Rol maestro cuyos passwords quieres ver.',
-        },
-        {
-          name: '/delgrouprol',
-          value: 'Elimina un password asociado a un rol maestro.\n**Parámetros:**\n- `password`: Contraseña que deseas eliminar.',
+          name: '**/delmember**',
+          value: 'Permite al usuario con un rol maestro eliminar el rol asignable de un usuario.\n*Parámetros:*\n- `master_role`: Rol maestro asociado.\n- `target_user`: Usuario al que deseas quitar el rol asignable.',
         },
       ]
     }
 
-    // Enviar el mensaje al usuario
+    const userEmbed = {
+      color: 0x00ff00,
+      title: 'Comandos de Usuarios',
+      description: 'Lista de comandos accesibles para todos los usuarios:',
+      fields: [
+        {
+          name: '**/joinrol**',
+          value: 'Obtén un rol usando una contraseña.\n*Parámetros:*\n- `password`: Contraseña del rol que se desea obtener.',
+        },
+        {
+          name: '**/joingrouprol**',
+          value: 'Usa un password para obtener un rol asignable.\n*Parámetros:*\n- `password`: Contraseña del rol asignable.',
+        },
+      ],
+    };
+
     interaction.reply({
-      embeds: [embed1, embed2],
+      embeds: [adminEmbed, rolMasterEmbed, userEmbed],
       flags: MessageFlags.Ephemeral
     });
   }
@@ -436,6 +468,123 @@ client.on('interactionCreate', async (interaction) => {
     } catch (err) {
       interaction.reply({
         content: 'Error al eliminar el password: ' + err.message,
+        flags: MessageFlags.Ephemeral
+      });
+    }
+  }
+
+  if (commandName === 'seemember') {
+    const masterRoleInput = options.getRole('role');
+
+    try {
+      const hasMasterRole = member.roles.cache.some(role => role.id === masterRoleInput.id);
+
+      if (!hasMasterRole) {
+        return interaction.reply({
+          content: 'No tienes el rol maestro requerido para usar este comando.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      await guild.members.fetch();
+
+      const roleData = await db.getGroupRoleByMasterRole(guild.id, masterRoleInput.id);
+
+      if (!roleData) {
+        return interaction.reply({
+          content: 'El rol maestro no está configurado en la base de datos.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      const assignableRole = guild.roles.cache.get(roleData.assignable_role_id);
+      if (!assignableRole) {
+        return interaction.reply({
+          content: 'El rol asignable asociado a este rol maestro no existe.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      // Obtener todos los miembros con el rol asignable
+      const membersWithRole = assignableRole.members.map(member => `<@${member.id}>`);
+
+      if (membersWithRole.length === 0) {
+        return interaction.reply({
+          content: `Nadie tiene el rol asignable asociado a **${masterRoleInput.name}**.`,
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      interaction.reply({
+        content: `Usuarios con el rol asignable asociado a **${masterRoleInput.name}**:\n${membersWithRole.join('\n')}`,
+        flags: MessageFlags.Ephemeral
+      });
+    } catch (err) {
+      interaction.reply({
+        content: 'Error al procesar el comando: ' + err.message,
+        flags: MessageFlags.Ephemeral
+      });
+    }
+  }
+
+  if (commandName === 'delmember') {
+    const masterRoleInput = options.getRole('master_role');
+    const targetUser = options.getUser('target_user');
+
+    try {
+      const hasMasterRole = member.roles.cache.some(role => role.id === masterRoleInput.id);
+
+      if (!hasMasterRole) {
+        return interaction.reply({
+          content: 'No tienes el rol maestro requerido para usar este comando.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      const roleData = await db.getGroupRoleByMasterRole(guild.id, masterRoleInput.id);
+
+      if (!roleData) {
+        return interaction.reply({
+          content: 'El rol maestro no está configurado en la base de datos.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      const assignableRole = guild.roles.cache.get(roleData.assignable_role_id);
+      if (!assignableRole) {
+        return interaction.reply({
+          content: 'El rol asignable asociado a este rol maestro no existe.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      const targetMember = guild.members.cache.get(targetUser.id);
+
+      if (!targetMember) {
+        return interaction.reply({
+          content: 'El usuario especificado no está en este servidor.',
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      const hasAssignableRole = targetMember.roles.cache.has(assignableRole.id);
+
+      if (!hasAssignableRole) {
+        return interaction.reply({
+          content: `El usuario **${targetUser.username}** no tiene el rol asignable asociado al rol maestro **${masterRoleInput.name}**.`,
+          flags: MessageFlags.Ephemeral
+        });
+      }
+
+      await targetMember.roles.remove(assignableRole);
+
+      interaction.reply({
+        content: `El rol asignable asociado al rol maestro **${masterRoleInput.name}** ha sido eliminado correctamente del usuario **${targetUser.username}**.`,
+        flags: MessageFlags.Ephemeral
+      });
+    } catch (err) {
+      interaction.reply({
+        content: 'Error al procesar el comando: ' + err.message,
         flags: MessageFlags.Ephemeral
       });
     }

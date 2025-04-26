@@ -112,11 +112,28 @@
 - **Parámetros:** Sin parámetros.
 - **Restricciones:** Accesible para todos los usuarios.
 
+---
+
+### **13. /seemember**
+- **Descripción:** Permite al usuario con un rol maestro ver los usuarios que tienen el rol asignado.
+- **Parámetros:**
+  - `role` (Role): Rol maestro que deseas verificar.
+- **Restricciones:** El usuario debe tener el rol maestro para usar este comando.
+
+---
+
+### **14. /delmember**
+- **Descripción:** Permite al usuario con un rol maestro eliminar el rol asignable de un usuario.
+- **Parámetros:**
+  - `master_role` (Role): Rol maestro asociado.
+  - `target_user` (User): Usuario al que deseas quitar el rol asignable.
+- **Restricciones:** El usuario debe tener el rol maestro, y el `target_user` debe tener el rol asignable.
+
 ## IMPORTANTE
 
 Recuerde siempre poner el bot por arriba de los roles que van a afectar
 
 ### Link al bot
-[Obten el Bot en tu server](https://discord.com/oauth2/authorize?client_id=1364981410200424520&permissions=268453888&integration_type=0&scope=bot+applications.commands)
+[Obten el Bot en tu server](https://discord.com/oauth2/authorize?client_id=1364981410200424520&permissions=1099914300416&integration_type=0&scope=bot+applications.commands)
 
 Gracias por usarme
